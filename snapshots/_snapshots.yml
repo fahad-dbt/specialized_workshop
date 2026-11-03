@@ -32,12 +32,3 @@ snapshots:
       strategy: check
       check_cols: all
       hard_deletes: new_record
-
-  - name: snp_mpl_bike_fobs
-    relation: ref('stg_mpl__bike_fobs')
-    description: SCD2 history of MPL bike FOBs. Replaces the MPL_BIKE_FOBS persist table.
-    config:
-      unique_key: fob_id
-      strategy: check
-      check_cols: all
-      hard_deletes: new_record

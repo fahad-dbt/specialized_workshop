@@ -13,8 +13,3 @@ models:
     description: >
       Column-level changelog for ORACLE_ITEMS. Keyed on inventory_item_id (DATA-8515), and SKU is
       populated from the item's SKU column even though it isn't the primary key.
-
-  - name: int_changelog__mpl_bike_fobs
-    description: >
-      Column-level changelog for MPL_BIKE_FOBS. No watermark column, so change_date falls back to
-      the snapshot time (the DATA-8515 "missing watermark" default).

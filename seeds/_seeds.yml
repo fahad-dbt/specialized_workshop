@@ -49,17 +49,3 @@ seeds:
         unit_weight: number(10,2)
         creation_date: timestamp_ntz
         last_update_date: timestamp_ntz
-
-  - name: mpl_bike_fobs
-    description: >
-      Simulated MPL bike FOB cost extract. Adds no new rules. This is the "adding a table is four
-      small files" demo. Has no watermark column, so change_date falls back to the snapshot time.
-    config:
-      column_types:
-        load_day: number
-        fob_id: number
-        sku: varchar
-        fob_port: varchar
-        currency: varchar
-        fob_cost: number(10,2)
-        effective_date: date

@@ -18,12 +18,3 @@ models:
           - not_null
       - name: deleted
         description: Soft-delete flag (Y / N / NULL). A change to Y is recorded as a DELETE in the changelog.
-
-  - name: stg_mpl__bike_fobs
-    description: One day's MPL bike FOB cost extract (selected by `var('load_day')`). One row per FOB.
-    columns:
-      - name: fob_id
-        description: MPL FOB key.
-        data_tests:
-          - unique
-          - not_null

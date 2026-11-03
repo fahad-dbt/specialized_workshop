@@ -17,7 +17,6 @@
     'int_changelog__mpl_bikes',
     'int_changelog__mpl_equipment',
     'int_changelog__oracle_items',
-    'int_changelog__mpl_bike_fobs',
 ] -%}
 
 with
