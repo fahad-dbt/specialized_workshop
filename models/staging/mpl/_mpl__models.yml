@@ -1,0 +1,29 @@
+models:
+  - name: stg_mpl__bikes
+    description: One day's MPL bike extract (selected by `var('load_day')`). One row per product.
+    columns:
+      - name: product_id
+        description: MPL product key. Replaces the `SHOW PRIMARY KEYS` lookup in the stored procedure.
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_mpl__equipment
+    description: One day's MPL equipment extract (selected by `var('load_day')`). One row per product.
+    columns:
+      - name: product_id
+        description: MPL product key.
+        data_tests:
+          - unique
+          - not_null
+      - name: deleted
+        description: Soft-delete flag (Y / N / NULL). A change to Y is recorded as a DELETE in the changelog.
+
+  - name: stg_mpl__bike_fobs
+    description: One day's MPL bike FOB cost extract (selected by `var('load_day')`). One row per FOB.
+    columns:
+      - name: fob_id
+        description: MPL FOB key.
+        data_tests:
+          - unique
+          - not_null

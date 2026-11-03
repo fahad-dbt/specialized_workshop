@@ -1,0 +1,65 @@
+seeds:
+  - name: mpl_bikes
+    description: >
+      Simulated MPL bike extract. Each `load_day` is a full daily extract (the equivalent of
+      MPL_BIKES_FULL_TEMP). Covers NEW, UPDATE and hard DELETE plus the Change / Change % math.
+    config:
+      column_types:
+        load_day: number
+        product_id: number
+        sku: varchar
+        model_name: varchar
+        model_year: number
+        product_family: varchar
+        msrp: number(10,2)
+        launch_date: date
+        display_order: number
+        update_user: number
+        last_update: timestamp_ntz
+
+  - name: mpl_equipment
+    description: >
+      Simulated MPL equipment extract. Has the varchar `deleted` flag (Y / N / NULL), which drives
+      the DATA-8961 rule: a change where the new value is Y is a DELETE.
+    config:
+      column_types:
+        load_day: number
+        product_id: number
+        sku: varchar
+        equipment_name: varchar
+        category: varchar
+        msrp: number(10,2)
+        deleted: varchar
+        update_user: number
+        last_update: timestamp_ntz
+
+  - name: oracle_items
+    description: >
+      Simulated Oracle item master extract. Second source system, keyed on `inventory_item_id`
+      (DATA-8515), with a SKU column that is not the primary key.
+    config:
+      column_types:
+        load_day: number
+        inventory_item_id: number
+        sku: varchar
+        description: varchar
+        item_status: varchar
+        primary_uom: varchar
+        list_price: number(10,2)
+        unit_weight: number(10,2)
+        creation_date: timestamp_ntz
+        last_update_date: timestamp_ntz
+
+  - name: mpl_bike_fobs
+    description: >
+      Simulated MPL bike FOB cost extract. Adds no new rules. This is the "adding a table is four
+      small files" demo. Has no watermark column, so change_date falls back to the snapshot time.
+    config:
+      column_types:
+        load_day: number
+        fob_id: number
+        sku: varchar
+        fob_port: varchar
+        currency: varchar
+        fob_cost: number(10,2)
+        effective_date: date

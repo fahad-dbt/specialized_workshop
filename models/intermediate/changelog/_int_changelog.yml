@@ -1,0 +1,20 @@
+models:
+  - name: int_changelog__mpl_bikes
+    description: >
+      Column-level changelog for MPL_BIKES, built from snp_mpl_bikes by the `build_changelog` macro.
+      One row per NEW / DELETE record (column_name = ALL) or per changed column (UPDATE).
+
+  - name: int_changelog__mpl_equipment
+    description: >
+      Column-level changelog for MPL_EQUIPMENT. Uses `soft_delete_column='deleted'`, so a change of
+      DELETED to Y is written as record_type DELETE (DATA-8961). No post-insert UPDATE needed.
+
+  - name: int_changelog__oracle_items
+    description: >
+      Column-level changelog for ORACLE_ITEMS. Keyed on inventory_item_id (DATA-8515), and SKU is
+      populated from the item's SKU column even though it isn't the primary key.
+
+  - name: int_changelog__mpl_bike_fobs
+    description: >
+      Column-level changelog for MPL_BIKE_FOBS. No watermark column, so change_date falls back to
+      the snapshot time (the DATA-8515 "missing watermark" default).

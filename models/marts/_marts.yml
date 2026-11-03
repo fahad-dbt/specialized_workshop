@@ -1,0 +1,157 @@
+models:
+  - name: fct_product_changes
+    description: >
+      The MDM product changelog. Replaces MDM_CHANGELOG_TBL. One row per NEW / DELETE record
+      (column_name = 'ALL') or per changed column (UPDATE) across every tracked table.
+      Incremental merge on a deterministic change_key, so it can be rerun or rebuilt safely.
+    config:
+      contract:
+        enforced: true
+    semantic_model:
+      enabled: true
+    agg_time_dimension: change_date
+    columns:
+      - name: change_key
+        description: >
+          Deterministic surrogate key: hash of table_name, table_pk_value, column_name, record_type
+          and snapshot_valid_from. Replaces CHANGELOG_SEQ.NEXTVAL, which differed on every rebuild.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+        entity:
+          type: primary
+          name: product_change
+      - name: table_name
+        description: Tracked table the change came from, e.g. MPL_BIKES.
+        data_type: varchar
+        data_tests:
+          - not_null
+        dimension:
+          type: categorical
+      - name: table_pk
+        description: Name of the primary key column of the tracked table (same as the SP's TABLE_PK).
+        data_type: varchar
+      - name: table_pk_value
+        description: Primary key value of the changed record.
+        data_type: varchar
+        data_tests:
+          - not_null
+      - name: product_id
+        description: Populated when the tracked table is keyed on PRODUCT_ID.
+        data_type: varchar
+      - name: item_id
+        description: Populated when the tracked table is keyed on ITEM_ID.
+        data_type: varchar
+      - name: inventory_item_id
+        description: Populated when the tracked table is keyed on INVENTORY_ITEM_ID.
+        data_type: varchar
+      - name: fob_id
+        description: Populated when the tracked table is keyed on FOB_ID.
+        data_type: varchar
+      - name: sku
+        description: SKU of the record. Taken from the table's SKU column when present, or from the PK when the PK is SKU.
+        data_type: varchar
+        dimension:
+          type: categorical
+      - name: column_name
+        description: Changed column (UPDATE), or ALL for record-level NEW / DELETE rows.
+        data_type: varchar
+        data_tests:
+          - not_null
+        dimension:
+          type: categorical
+      - name: old_value
+        description: Value before the change, as text. NULL for NEW / DELETE rows.
+        data_type: varchar
+      - name: new_value
+        description: Value after the change, as text. NULL for NEW / DELETE rows.
+        data_type: varchar
+      - name: change
+        description: >
+          Difference between new and old value. Numbers give the arithmetic difference; dates and
+          timestamps give the day difference with a ' days' suffix. NULL for text, _ID columns,
+          and columns in var('cols_to_exclude_change_diff').
+        data_type: varchar
+      - name: change_percent
+        description: (new - old) / old, rounded to 4 decimals. Numbers only; NULL when old is 0 or NULL.
+        data_type: number(38, 4)
+      - name: record_type
+        description: NEW, UPDATE or DELETE.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['NEW', 'UPDATE', 'DELETE']
+        dimension:
+          type: categorical
+      - name: change_date
+        description: When the change happened. The table's watermark column if it has one, otherwise the snapshot time.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+        granularity: day
+        dimension:
+          type: time
+      - name: system_of_change
+        description: Source system of the tracked table (MPL, ORACLE).
+        data_type: varchar
+        data_tests:
+          - not_null
+        dimension:
+          type: categorical
+      - name: snapshot_valid_from
+        description: When the version was captured by the snapshot. Drives the incremental filter.
+        data_type: timestamp_ntz
+      - name: load_date
+        description: When the row was last merged into this table.
+        data_type: timestamp_ntz
+
+    metrics:
+      - name: product_changes
+        label: Product Changes
+        description: Count of changelog rows (record-level NEW / DELETE plus column-level UPDATE).
+        type: simple
+        agg: count
+        expr: change_key
+
+      - name: new_products
+        label: New Products
+        description: Count of records that first appeared after the initial load.
+        type: simple
+        agg: count
+        expr: change_key
+        filter: |
+          {{ Dimension('product_change__record_type') }} = 'NEW'
+
+      - name: deleted_products
+        label: Deleted Products
+        description: Count of records removed from the source, or soft-deleted (DELETED set to Y).
+        type: simple
+        agg: count
+        expr: change_key
+        filter: |
+          {{ Dimension('product_change__record_type') }} = 'DELETE'
+
+      - name: avg_msrp_change_pct
+        label: Avg MSRP Change %
+        description: Average percentage change of MSRP across MSRP updates.
+        type: simple
+        agg: average
+        expr: change_percent
+        filter: |
+          {{ Dimension('product_change__column_name') }} = 'MSRP'
+
+  - name: time_spine_daily
+    description: One row per day from 2024-01-01 to 2029-12-31. Required by the Semantic Layer.
+    config:
+      materialized: table
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: Calendar day.
+        granularity: day

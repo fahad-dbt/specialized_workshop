@@ -1,0 +1,43 @@
+# Each snapshot replaces three moving parts of the current process:
+#   1. the Matillion merge into the SCD2 persist table
+#   2. the persist vs <TABLE>_FULL_TEMP anti-join (SP step 6)
+#   3. the biweekly delete job + persist-table UPDATE (SP step 8)
+# `hard_deletes: new_record` writes an explicit row with dbt_is_deleted = True
+# when a key disappears from the extract, on every run.
+
+snapshots:
+  - name: snp_mpl_bikes
+    relation: ref('stg_mpl__bikes')
+    description: SCD2 history of MPL bikes. Replaces the MPL_BIKES persist table.
+    config:
+      unique_key: product_id
+      strategy: check
+      check_cols: all
+      hard_deletes: new_record
+
+  - name: snp_mpl_equipment
+    relation: ref('stg_mpl__equipment')
+    description: SCD2 history of MPL equipment. Replaces the MPL_EQUIPMENT persist table.
+    config:
+      unique_key: product_id
+      strategy: check
+      check_cols: all
+      hard_deletes: new_record
+
+  - name: snp_oracle_items
+    relation: ref('stg_oracle__items')
+    description: SCD2 history of Oracle items. Replaces the ORACLE_ITEMS persist table.
+    config:
+      unique_key: inventory_item_id
+      strategy: check
+      check_cols: all
+      hard_deletes: new_record
+
+  - name: snp_mpl_bike_fobs
+    relation: ref('stg_mpl__bike_fobs')
+    description: SCD2 history of MPL bike FOBs. Replaces the MPL_BIKE_FOBS persist table.
+    config:
+      unique_key: fob_id
+      strategy: check
+      check_cols: all
+      hard_deletes: new_record

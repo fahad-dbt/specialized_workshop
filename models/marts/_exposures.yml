@@ -1,0 +1,14 @@
+exposures:
+  - name: product_change_report
+    label: Product Change Report
+    type: dashboard
+    maturity: low
+    description: >
+      Tableau product change report built on the MDM changelog (currently in internal validation).
+      Documents who depends on fct_product_changes so impact shows up in lineage and CI.
+    depends_on:
+      - ref('fct_product_changes')
+      - metric('product_changes')
+    owner:
+      name: Data Engineering
+      email: data-engineering@specialized.com

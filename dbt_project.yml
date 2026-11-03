@@ -1,0 +1,57 @@
+name: 'specialized_workshop'
+version: '1.0.0'
+config-version: 2
+
+profile: 'default'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# ---------------------------------------------------------------------------
+# Replaces the hardcoded constants in SP_BUILD_MDM_CHANGELOG (step 1).
+# Changing an exclusion list is now a one-line PR, not a new procedure version.
+# ---------------------------------------------------------------------------
+vars:
+  # Which daily extract the staging models read. Simulates the <TABLE>_FULL_TEMP
+  # load for a given day. Demo: dbt build --vars '{load_day: 1}', then 2, then 3.
+  load_day: 1
+
+  # Metadata / SCD columns that are never tracked in the changelog (SP: cols_to_exclude)
+  cols_to_exclude:
+    - LAST_UPDATE
+    - CREATED_BY
+    - CREATE_DATE
+    - UPDATE_DATE
+    - SCD_START_DATE
+    - SCD_END_DATE
+    - SCD_ACTIVE_FLAG
+    - ROW_HASH
+    - LAST_UPDATE_DATE_11I
+    - CREATION_DATE
+    - LAST_UPDATE_DATE
+
+  # Numeric columns where Change / Change % is meaningless (SP: cols_to_exclude_change_diff).
+  # Columns ending in _ID are also skipped.
+  cols_to_exclude_change_diff:
+    - DISPLAY_ORDER
+    - UPDATE_USER
+
+models:
+  specialized_workshop:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+      changelog:
+        +tags: ['changelog']
+    marts:
+      +materialized: table
