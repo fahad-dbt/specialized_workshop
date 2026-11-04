@@ -1,9 +1,0 @@
-models:
-  - name: stg_oracle__items
-    description: One day's Oracle item master extract (selected by `var('load_day')`). One row per inventory item.
-    columns:
-      - name: inventory_item_id
-        description: Oracle inventory item key.
-        data_tests:
-          - unique
-          - not_null

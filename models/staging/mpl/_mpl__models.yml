@@ -1,20 +1,6 @@
 models:
   - name: stg_mpl__bikes
-    description: One day's MPL bike extract (selected by `var('load_day')`). One row per product.
-    columns:
-      - name: product_id
-        description: MPL product key. Replaces the `SHOW PRIMARY KEYS` lookup in the stored procedure.
-        data_tests:
-          - unique
-          - not_null
-
-  - name: stg_mpl__equipment
-    description: One day's MPL equipment extract (selected by `var('load_day')`). One row per product.
-    columns:
-      - name: product_id
-        description: MPL product key.
-        data_tests:
-          - unique
-          - not_null
-      - name: deleted
-        description: Soft-delete flag (Y / N / NULL). A change to Y is recorded as a DELETE in the changelog.
+    description: >
+      MPL bike history: every load day of the extract, one row per product per load day.
+      Stands in for the SCD2 persist table in Session 1. In Session 2 this filters to a single
+      day with var('load_day') and a snapshot takes over the history.

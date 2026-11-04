@@ -2,15 +2,15 @@ with
 
 source as (
 
-    -- One day's full extract. Equivalent of MPL_BIKES_FULL_TEMP.
+    -- Every load day of the extract. Stands in for the SCD2 persist table.
     select * from {{ ref('mpl_bikes') }}
-    where load_day = {{ var('load_day') }}
 
 ),
 
 renamed as (
 
     select
+        load_day,
         product_id,
         sku,
         model_name,
