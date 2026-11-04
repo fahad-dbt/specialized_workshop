@@ -16,6 +16,29 @@ seeds:
         display_order: number
         update_user: number
         last_update: timestamp_ntz
+    columns:
+      - name: load_day
+        description: '{{ doc("load_day") }}'
+      - name: product_id
+        description: '{{ doc("mpl_product_id") }}'
+      - name: sku
+        description: '{{ doc("sku") }}'
+      - name: model_name
+        description: '{{ doc("model_name") }}'
+      - name: model_year
+        description: '{{ doc("model_year") }}'
+      - name: product_family
+        description: '{{ doc("product_family") }}'
+      - name: msrp
+        description: '{{ doc("msrp") }}'
+      - name: launch_date
+        description: '{{ doc("launch_date") }}'
+      - name: display_order
+        description: '{{ doc("display_order") }}'
+      - name: update_user
+        description: '{{ doc("update_user") }}'
+      - name: last_update
+        description: '{{ doc("last_update") }}'
 
   - name: mpl_equipment
     description: >
@@ -32,6 +55,25 @@ seeds:
         deleted: varchar
         update_user: number
         last_update: timestamp_ntz
+    columns:
+      - name: load_day
+        description: '{{ doc("load_day") }}'
+      - name: product_id
+        description: '{{ doc("mpl_product_id") }}'
+      - name: sku
+        description: '{{ doc("sku") }}'
+      - name: equipment_name
+        description: '{{ doc("equipment_name") }}'
+      - name: category
+        description: '{{ doc("equipment_category") }}'
+      - name: msrp
+        description: '{{ doc("msrp") }}'
+      - name: deleted
+        description: '{{ doc("deleted_flag") }}'
+      - name: update_user
+        description: '{{ doc("update_user") }}'
+      - name: last_update
+        description: '{{ doc("last_update") }}'
 
   - name: oracle_items
     description: >
@@ -49,6 +91,27 @@ seeds:
         unit_weight: number(10,2)
         creation_date: timestamp_ntz
         last_update_date: timestamp_ntz
+    columns:
+      - name: load_day
+        description: '{{ doc("load_day") }}'
+      - name: inventory_item_id
+        description: '{{ doc("inventory_item_id") }}'
+      - name: sku
+        description: '{{ doc("sku") }}'
+      - name: description
+        description: '{{ doc("oracle_item_description") }}'
+      - name: item_status
+        description: '{{ doc("item_status") }}'
+      - name: primary_uom
+        description: '{{ doc("primary_uom") }}'
+      - name: list_price
+        description: '{{ doc("list_price") }}'
+      - name: unit_weight
+        description: '{{ doc("unit_weight") }}'
+      - name: creation_date
+        description: '{{ doc("creation_date") }}'
+      - name: last_update_date
+        description: '{{ doc("last_update_date") }}'
 
   - name: mpl_bike_fobs
     description: >
@@ -63,3 +126,18 @@ seeds:
         currency: varchar
         fob_cost: number(10,2)
         effective_date: date
+    columns:
+      - name: load_day
+        description: '{{ doc("load_day") }}'
+      - name: fob_id
+        description: '{{ doc("fob_id") }}'
+      - name: sku
+        description: '{{ doc("sku") }}'
+      - name: fob_port
+        description: '{{ doc("fob_port") }}'
+      - name: currency
+        description: '{{ doc("currency") }}'
+      - name: fob_cost
+        description: '{{ doc("fob_cost") }}'
+      - name: effective_date
+        description: '{{ doc("effective_date") }}'

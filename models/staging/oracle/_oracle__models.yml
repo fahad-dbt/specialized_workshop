@@ -1,9 +1,26 @@
 models:
   - name: stg_oracle__items
-    description: One day's Oracle item master extract (selected by `var('load_day')`). One row per inventory item.
+    description: >
+      One day's Oracle item master extract (selected by `var('load_day')`). One row per inventory item.
     columns:
       - name: inventory_item_id
-        description: Oracle inventory item key.
+        description: '{{ doc("inventory_item_id") }}'
         data_tests:
           - unique
           - not_null
+      - name: sku
+        description: '{{ doc("sku") }}'
+      - name: description
+        description: '{{ doc("oracle_item_description") }}'
+      - name: item_status
+        description: '{{ doc("item_status") }}'
+      - name: primary_uom
+        description: '{{ doc("primary_uom") }}'
+      - name: list_price
+        description: '{{ doc("list_price") }}'
+      - name: unit_weight
+        description: '{{ doc("unit_weight") }}'
+      - name: creation_date
+        description: '{{ doc("creation_date") }}'
+      - name: last_update_date
+        description: '{{ doc("last_update_date") }}'

@@ -1,0 +1,7 @@
+analyses:
+  - name: session_1__handwritten_changelog_mpl_bikes
+    description: >
+      Session 1 teaching artifact: the MPL_BIKES changelog written by hand, with no Jinja beyond
+      `ref()`. It tracks MSRP, LAUNCH_DATE and MODEL_NAME with plain `LAG`, Change and Change %.
+      Compare it with `int_changelog__mpl_bikes` to see the same logic as a single
+      `build_changelog` call. Compile it to read the SQL; it never builds a table.

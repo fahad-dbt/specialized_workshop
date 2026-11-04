@@ -1,0 +1,16 @@
+data_tests:
+  - name: assert_soft_delete_flag_mapped
+    description: >
+      DATA-8961: every change of DELETED to Y must be recorded as record_type DELETE. Replaces the
+      post-insert `UPDATE ... SET RECORD_TYPE = 'DELETE'` in the stored procedure with a check
+      that runs every time.
+
+  - name: assert_update_has_distinct_old_new
+    description: >
+      An UPDATE row is only valid if the value actually changed. Catches a regression in the
+      change detection that would write rows where old_value equals new_value.
+
+  - name: assert_record_level_rows_have_no_values
+    description: >
+      Record-level rows (NEW and DELETE, column_name = 'ALL') carry no column values: old_value,
+      new_value, change and change_percent must all be NULL.

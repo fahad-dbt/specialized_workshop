@@ -5,39 +5,146 @@
 # `hard_deletes: new_record` writes an explicit row with dbt_is_deleted = True
 # when a key disappears from the extract, on every run.
 
+# Snapshot meta columns are the same on every snapshot, so they're defined once here.
+anchors:
+  - &dbt_scd_id
+    name: dbt_scd_id
+    description: '{{ doc("dbt_scd_id") }}'
+  - &dbt_updated_at
+    name: dbt_updated_at
+    description: '{{ doc("dbt_updated_at") }}'
+  - &dbt_valid_from
+    name: dbt_valid_from
+    description: '{{ doc("dbt_valid_from") }}'
+  - &dbt_valid_to
+    name: dbt_valid_to
+    description: '{{ doc("dbt_valid_to") }}'
+  - &dbt_is_deleted
+    name: dbt_is_deleted
+    description: '{{ doc("dbt_is_deleted") }}'
+  - &sku
+    name: sku
+    description: '{{ doc("sku") }}'
+
 snapshots:
   - name: snp_mpl_bikes
     relation: ref('stg_mpl__bikes')
-    description: SCD2 history of MPL bikes. Replaces the MPL_BIKES persist table.
+    description: SCD2 history of MPL bikes, one row per product version. Replaces the MPL_BIKES persist table.
     config:
       unique_key: product_id
       strategy: check
       check_cols: all
       hard_deletes: new_record
+    columns:
+      - name: product_id
+        description: '{{ doc("mpl_product_id") }}'
+      - *sku
+      - name: model_name
+        description: '{{ doc("model_name") }}'
+      - name: model_year
+        description: '{{ doc("model_year") }}'
+      - name: product_family
+        description: '{{ doc("product_family") }}'
+      - name: msrp
+        description: '{{ doc("msrp") }}'
+      - name: launch_date
+        description: '{{ doc("launch_date") }}'
+      - name: display_order
+        description: '{{ doc("display_order") }}'
+      - name: update_user
+        description: '{{ doc("update_user") }}'
+      - name: last_update
+        description: '{{ doc("last_update") }}'
+      - *dbt_scd_id
+      - *dbt_updated_at
+      - *dbt_valid_from
+      - *dbt_valid_to
+      - *dbt_is_deleted
 
   - name: snp_mpl_equipment
     relation: ref('stg_mpl__equipment')
-    description: SCD2 history of MPL equipment. Replaces the MPL_EQUIPMENT persist table.
+    description: SCD2 history of MPL equipment, one row per product version. Replaces the MPL_EQUIPMENT persist table.
     config:
       unique_key: product_id
       strategy: check
       check_cols: all
       hard_deletes: new_record
+    columns:
+      - name: product_id
+        description: '{{ doc("mpl_product_id") }}'
+      - *sku
+      - name: equipment_name
+        description: '{{ doc("equipment_name") }}'
+      - name: category
+        description: '{{ doc("equipment_category") }}'
+      - name: msrp
+        description: '{{ doc("msrp") }}'
+      - name: deleted
+        description: '{{ doc("deleted_flag") }}'
+      - name: update_user
+        description: '{{ doc("update_user") }}'
+      - name: last_update
+        description: '{{ doc("last_update") }}'
+      - *dbt_scd_id
+      - *dbt_updated_at
+      - *dbt_valid_from
+      - *dbt_valid_to
+      - *dbt_is_deleted
 
   - name: snp_oracle_items
     relation: ref('stg_oracle__items')
-    description: SCD2 history of Oracle items. Replaces the ORACLE_ITEMS persist table.
+    description: SCD2 history of Oracle items, one row per item version. Replaces the ORACLE_ITEMS persist table.
     config:
       unique_key: inventory_item_id
       strategy: check
       check_cols: all
       hard_deletes: new_record
+    columns:
+      - name: inventory_item_id
+        description: '{{ doc("inventory_item_id") }}'
+      - *sku
+      - name: description
+        description: '{{ doc("oracle_item_description") }}'
+      - name: item_status
+        description: '{{ doc("item_status") }}'
+      - name: primary_uom
+        description: '{{ doc("primary_uom") }}'
+      - name: list_price
+        description: '{{ doc("list_price") }}'
+      - name: unit_weight
+        description: '{{ doc("unit_weight") }}'
+      - name: creation_date
+        description: '{{ doc("creation_date") }}'
+      - name: last_update_date
+        description: '{{ doc("last_update_date") }}'
+      - *dbt_scd_id
+      - *dbt_updated_at
+      - *dbt_valid_from
+      - *dbt_valid_to
+      - *dbt_is_deleted
 
   - name: snp_mpl_bike_fobs
     relation: ref('stg_mpl__bike_fobs')
-    description: SCD2 history of MPL bike FOBs. Replaces the MPL_BIKE_FOBS persist table.
+    description: SCD2 history of MPL bike FOBs, one row per FOB version. Replaces the MPL_BIKE_FOBS persist table.
     config:
       unique_key: fob_id
       strategy: check
       check_cols: all
       hard_deletes: new_record
+    columns:
+      - name: fob_id
+        description: '{{ doc("fob_id") }}'
+      - *sku
+      - name: fob_port
+        description: '{{ doc("fob_port") }}'
+      - name: currency
+        description: '{{ doc("currency") }}'
+      - name: fob_cost
+        description: '{{ doc("fob_cost") }}'
+      - name: effective_date
+        description: '{{ doc("effective_date") }}'
+      - *dbt_scd_id
+      - *dbt_updated_at
+      - *dbt_valid_from
+      - *dbt_valid_to
+      - *dbt_is_deleted

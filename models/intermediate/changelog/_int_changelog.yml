@@ -1,20 +1,65 @@
+# All four int_changelog__* models come from build_changelog, so they share one output schema.
+# It's defined once as an anchor and reused by each model.
+anchors:
+  - &changelog_columns
+    - name: change_key
+      description: '{{ doc("changelog__change_key") }}'
+    - name: table_name
+      description: '{{ doc("changelog__table_name") }}'
+    - name: table_pk
+      description: '{{ doc("changelog__table_pk") }}'
+    - name: table_pk_value
+      description: '{{ doc("changelog__table_pk_value") }}'
+    - name: product_id
+      description: '{{ doc("changelog__product_id") }}'
+    - name: item_id
+      description: '{{ doc("changelog__item_id") }}'
+    - name: inventory_item_id
+      description: '{{ doc("changelog__inventory_item_id") }}'
+    - name: fob_id
+      description: '{{ doc("changelog__fob_id") }}'
+    - name: sku
+      description: '{{ doc("changelog__sku") }}'
+    - name: column_name
+      description: '{{ doc("changelog__column_name") }}'
+    - name: old_value
+      description: '{{ doc("changelog__old_value") }}'
+    - name: new_value
+      description: '{{ doc("changelog__new_value") }}'
+    - name: change
+      description: '{{ doc("changelog__change") }}'
+    - name: change_percent
+      description: '{{ doc("changelog__change_percent") }}'
+    - name: record_type
+      description: '{{ doc("changelog__record_type") }}'
+    - name: change_date
+      description: '{{ doc("changelog__change_date") }}'
+    - name: system_of_change
+      description: '{{ doc("changelog__system_of_change") }}'
+    - name: snapshot_valid_from
+      description: '{{ doc("changelog__snapshot_valid_from") }}'
+
 models:
   - name: int_changelog__mpl_bikes
     description: >
       Column-level changelog for MPL_BIKES, built from snp_mpl_bikes by the `build_changelog` macro.
       One row per NEW / DELETE record (column_name = ALL) or per changed column (UPDATE).
+    columns: *changelog_columns
 
   - name: int_changelog__mpl_equipment
     description: >
       Column-level changelog for MPL_EQUIPMENT. Uses `soft_delete_column='deleted'`, so a change of
       DELETED to Y is written as record_type DELETE (DATA-8961). No post-insert UPDATE needed.
+    columns: *changelog_columns
 
   - name: int_changelog__oracle_items
     description: >
       Column-level changelog for ORACLE_ITEMS. Keyed on inventory_item_id (DATA-8515), and SKU is
       populated from the item's SKU column even though it isn't the primary key.
+    columns: *changelog_columns
 
   - name: int_changelog__mpl_bike_fobs
     description: >
       Column-level changelog for MPL_BIKE_FOBS. No watermark column, so change_date falls back to
       the snapshot time (the DATA-8515 "missing watermark" default).
+    columns: *changelog_columns

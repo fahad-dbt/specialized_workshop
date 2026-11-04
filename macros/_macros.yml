@@ -1,0 +1,84 @@
+macros:
+  - name: build_changelog
+    description: >
+      Builds the column-level changelog for one snapshotted table. This is SP steps 3-8 of
+      `SP_BUILD_MDM_CHANGELOG` as a single set-based query: one `LAG` over an object of all tracked
+      columns, then `LATERAL FLATTEN`, instead of about 3N `LAG`s and N+1 scans. Emits NEW,
+      UPDATE and DELETE rows (see the project overview). It fails at compile time if the primary
+      key isn't a column of the snapshot, which replaces the NO_PK_FOUND Teams alert. Each
+      `int_changelog__*` model is a single call to this macro.
+    arguments:
+      - name: relation
+        type: relation
+        description: "`ref()` to the snapshot that holds the table's SCD2 history."
+      - name: table_name
+        type: string
+        description: Value written to `table_name`, e.g. `'MPL_BIKES'`.
+      - name: pk
+        type: string
+        description: Primary key column of the table. Replaces the `SHOW PRIMARY KEYS` lookup.
+      - name: source_system
+        type: string
+        description: Value written to `system_of_change`, e.g. `'MPL'` or `'ORACLE'`.
+      - name: watermark
+        type: string
+        description: >
+          Optional business timestamp column used as `change_date` for NEW and UPDATE rows. When
+          omitted, the snapshot time is used (the DATA-8515 "missing watermark" default).
+      - name: soft_delete_column
+        type: string
+        description: >
+          Optional Y/N column. A change to `Y` is written as a DELETE when the row is created
+          (DATA-8961), so there's no post-insert `UPDATE`.
+
+  - name: get_tracked_columns
+    description: >
+      Returns the columns of a relation that the changelog tracks, as a list of
+      `{name, data_type}`. Skips the primary key, anything in `var('cols_to_exclude')`, surrogate
+      keys (`SK_*`) and snapshot meta columns (`DBT_*`). Replaces the `INFORMATION_SCHEMA.COLUMNS`
+      query in SP step 4. It inspects the relation at compile time, so the relation must exist.
+    arguments:
+      - name: relation
+        type: relation
+        description: The relation to inspect, normally a snapshot.
+      - name: pk
+        type: string
+        description: Primary key column to leave out.
+
+  - name: change_calc
+    description: >
+      Returns SQL expressions for Change and Change % for one column, based on its data type.
+      Numbers give the difference and (new - old) / old. Dates and timestamps give the day
+      difference with a ` days` suffix. Everything else, plus columns ending in `_ID` and those in
+      `var('cols_to_exclude_change_diff')`, gets none. Replaces the `change_expr` /
+      `change_pct_expr` loop in SP step 4.
+    arguments:
+      - name: column_name
+        type: string
+        description: Upper-case column name.
+      - name: data_type
+        type: string
+        description: Upper-case Snowflake data type of the column.
+      - name: new_value
+        type: string
+        description: SQL expression holding the new value. Defaults to `new_variant`.
+      - name: old_value
+        type: string
+        description: SQL expression holding the old value. Defaults to `old_variant`.
+
+  - name: changelog_key_columns
+    description: >
+      Emits `table_pk`, `table_pk_value`, the four key columns (`product_id`, `item_id`,
+      `inventory_item_id`, `fob_id`) and `sku`. The stored procedure repeats this CASE block in both
+      the NEW/UPDATE and DELETE branches; here it's written once. Adding a key column (what
+      DATA-8515 did) is a one-line change.
+    arguments:
+      - name: pk
+        type: string
+        description: Primary key column of the tracked table.
+
+  - name: reset_demo
+    description: >
+      Workshop prep only. Drops every snapshot and `fct_product_changes` in the target schema so
+      the load_day 1 → 2 → 3 walkthrough can start from scratch. Run with
+      `dbt run-operation reset_demo`. Not part of the DAG; never run it against production.
