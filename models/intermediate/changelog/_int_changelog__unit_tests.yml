@@ -1,0 +1,78 @@
+# Unit tests for the build_changelog rules. Each one feeds mock snapshot rows in and checks
+# the changelog rows out, so they pin the logic itself, independent of the real data.
+# Note: build_changelog reads the snapshot's column list at compile time, so the snapshot
+# table must exist in the target (dbt build runs snapshots first; CI gets it via defer).
+# Dates: 2026-01-01 = initial snapshot load, 2026-02-01 = the next load.
+
+unit_tests:
+  - name: test_changelog_change_math_null_transitions_new_and_delete
+    description: >
+      Change / Change % for numbers (incl. previous = 0), day diff for dates, NULL->value and
+      value->NULL captured, DISPLAY_ORDER / UPDATE_USER get no Change, first version after the
+      initial load is NEW, and a key missing from the extract is a DELETE.
+    model: int_changelog__mpl_bikes
+    given:
+      - input: ref('snp_mpl_bikes')
+        rows:
+          # 1: MSRP 100 -> 125, launch date +10 days, display_order and update_user change
+          - {product_id: 1, sku: BK-1, model_name: A, msrp: 100, launch_date: '2026-01-01', display_order: 1, update_user: 10, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 1, sku: BK-1, model_name: A, msrp: 125, launch_date: '2026-01-11', display_order: 2, update_user: 11, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+          # 2: MSRP NULL -> 50
+          - {product_id: 2, sku: BK-2, model_name: B, msrp: null, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 2, sku: BK-2, model_name: B, msrp: 50, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+          # 3: MSRP 0 -> 10 (Change % must be NULL, not divide-by-zero)
+          - {product_id: 3, sku: BK-3, model_name: C, msrp: 0, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 3, sku: BK-3, model_name: C, msrp: 10, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+          # 4: removed from the extract -> snapshot writes a dbt_is_deleted row
+          - {product_id: 4, sku: BK-4, model_name: D, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 4, sku: BK-4, model_name: D, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'True'}
+          # 5: first seen after the initial load -> NEW
+          - {product_id: 5, sku: BK-5, model_name: E, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+          # 6: model_name X -> NULL
+          - {product_id: 6, sku: BK-6, model_name: X, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 6, sku: BK-6, model_name: null, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+    expect:
+      rows:
+        - {table_pk_value: '1', sku: BK-1, column_name: MSRP, old_value: '100', new_value: '125', change: '25', change_percent: 0.25, record_type: UPDATE}
+        - {table_pk_value: '1', sku: BK-1, column_name: LAUNCH_DATE, old_value: '2026-01-01', new_value: '2026-01-11', change: '10 days', change_percent: null, record_type: UPDATE}
+        - {table_pk_value: '1', sku: BK-1, column_name: DISPLAY_ORDER, old_value: '1', new_value: '2', change: null, change_percent: null, record_type: UPDATE}
+        - {table_pk_value: '1', sku: BK-1, column_name: UPDATE_USER, old_value: '10', new_value: '11', change: null, change_percent: null, record_type: UPDATE}
+        - {table_pk_value: '2', sku: BK-2, column_name: MSRP, old_value: null, new_value: '50', change: null, change_percent: null, record_type: UPDATE}
+        - {table_pk_value: '3', sku: BK-3, column_name: MSRP, old_value: '0', new_value: '10', change: '10', change_percent: null, record_type: UPDATE}
+        - {table_pk_value: '4', sku: BK-4, column_name: ALL, old_value: null, new_value: null, change: null, change_percent: null, record_type: DELETE}
+        - {table_pk_value: '5', sku: BK-5, column_name: ALL, old_value: null, new_value: null, change: null, change_percent: null, record_type: NEW}
+        - {table_pk_value: '6', sku: BK-6, column_name: MODEL_NAME, old_value: X, new_value: null, change: null, change_percent: null, record_type: UPDATE}
+
+  - name: test_changelog_soft_delete_flag
+    description: >
+      DATA-8961: a change of DELETED to Y is a DELETE. NULL -> N and Y -> N stay UPDATE.
+      Set at write time, so no post-insert UPDATE on the changelog.
+    model: int_changelog__mpl_equipment
+    given:
+      - input: ref('snp_mpl_equipment')
+        rows:
+          - {product_id: 10, sku: EQ-10, deleted: N, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 10, sku: EQ-10, deleted: Y, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 11, sku: EQ-11, deleted: null, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 11, sku: EQ-11, deleted: N, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 12, sku: EQ-12, deleted: Y, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {product_id: 12, sku: EQ-12, deleted: N, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+    expect:
+      rows:
+        - {table_pk_value: '10', column_name: DELETED, old_value: N, new_value: Y, record_type: DELETE}
+        - {table_pk_value: '11', column_name: DELETED, old_value: null, new_value: N, record_type: UPDATE}
+        - {table_pk_value: '12', column_name: DELETED, old_value: Y, new_value: N, record_type: UPDATE}
+
+  - name: test_changelog_key_columns_and_sku
+    description: >
+      DATA-8515: a table keyed on INVENTORY_ITEM_ID fills that key column (and leaves PRODUCT_ID
+      NULL), and SKU comes from the table's SKU column even though it isn't the primary key.
+    model: int_changelog__oracle_items
+    given:
+      - input: ref('snp_oracle_items')
+        rows:
+          - {inventory_item_id: 500, sku: BK-1, list_price: 200, dbt_valid_from: '2026-01-01 00:00:00', dbt_is_deleted: 'False'}
+          - {inventory_item_id: 500, sku: BK-1, list_price: 150, dbt_valid_from: '2026-02-01 00:00:00', dbt_is_deleted: 'False'}
+    expect:
+      rows:
+        - {table_name: ORACLE_ITEMS, table_pk: INVENTORY_ITEM_ID, table_pk_value: '500', inventory_item_id: '500', product_id: null, sku: BK-1, system_of_change: ORACLE, column_name: LIST_PRICE, old_value: '200', new_value: '150', change: '-50', change_percent: -0.25, record_type: UPDATE}
