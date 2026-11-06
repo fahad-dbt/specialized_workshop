@@ -2,7 +2,6 @@ with
 
 source as (
 
-    -- Every load day of the extract. Stands in for the SCD2 persist table.
     select * from {{ source('mpl', 'raw_mpl_bikes') }}
 
 ),
@@ -18,6 +17,7 @@ renamed as (
         model_year,
         product_family,
         msrp            as msrp_usd,
+    --  18.63 * mspr    as msrp_peso 
         launch_date,
         display_order,
         update_user     as updated_by_user_id,
