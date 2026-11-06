@@ -15,7 +15,7 @@ renamed as (
         sku,
         equipment_name,
         category,
-        msrp,
+        msrp            as msrp_usd,
         deleted,
         update_user,
         last_update
