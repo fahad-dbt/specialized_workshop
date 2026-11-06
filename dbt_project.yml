@@ -48,6 +48,7 @@ vars:
 
 models:
   specialized_workshop:
+    +static_analysis: strict
     staging:
       +materialized: view
     intermediate:
