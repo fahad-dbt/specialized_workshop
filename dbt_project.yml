@@ -28,6 +28,7 @@ vars:
   # Metadata / SCD columns that are never tracked in the changelog (SP: cols_to_exclude)
   cols_to_exclude:
     - LAST_UPDATE
+    - LAST_UPDATED_AT
     - CREATED_BY
     - CREATE_DATE
     - UPDATE_DATE

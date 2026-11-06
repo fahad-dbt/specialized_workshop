@@ -1,12 +1,47 @@
 models:
   - name: stg_mpl__bikes
-    description: One day's MPL bike extract (selected by `var('load_day')`). One row per product.
+    description: >
+      One day's MPL bike extract from the raw_mpl_bikes source (selected by `var('load_day')`).
+      One row per product. Columns are renamed here, once, for everything downstream. The contract
+      fails the build if the source's shape changes, before bad data reaches the snapshot.
+    config:
+      contract:
+        enforced: true
     columns:
       - name: product_id
         description: MPL product key. Replaces the `SHOW PRIMARY KEYS` lookup in the stored procedure.
+        data_type: number(38,0)
         data_tests:
           - unique
           - not_null
+      - name: sku
+        description: Stock keeping unit, e.g. BK-1001.
+        data_type: varchar
+      - name: model_name
+        description: Marketing name of the bike model.
+        data_type: varchar
+      - name: model_year
+        description: Model year of the bike.
+        data_type: number(38,0)
+      - name: product_family
+        description: Product family (Road, Mountain, Gravel, Active, Trail).
+        data_type: varchar
+      - name: msrp_usd
+        description: Manufacturer's suggested retail price in USD (raw column `msrp`).
+        data_type: number(38,2)
+      - name: launch_date
+        description: Date the product launches.
+        data_type: date
+      - name: display_order
+        description: Sort order used for display.
+        data_type: number(38,0)
+      - name: updated_by_user_id
+        description: ID of the user who last updated the record (raw column `update_user`).
+        data_type: number(38,0)
+      - name: last_updated_at
+        description: When the record was last updated in MPL (raw column `last_update`). Used as the watermark.
+        data_type: timestamp_ntz
+
 
   - name: stg_mpl__equipment
     description: One day's MPL equipment extract (selected by `var('load_day')`). One row per product.

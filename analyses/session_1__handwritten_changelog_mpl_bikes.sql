@@ -1,17 +1,17 @@
--- Session 1: the changelog for MPL_BIKES written by hand. No Jinja beyond ref().
--- Tracks three columns: MSRP, LAUNCH_DATE and MODEL_NAME.
--- The seed holds every load day, so it stands in for the SCD2 persist table here.
+-- Session 1: the changelog for MPL_BIKES written by hand. No Jinja beyond source().
+-- Tracks three columns: MSRP, LAUNCH_DATE and MODEL_NAME (raw source names).
+-- The raw source holds every load day, so it stands in for the SCD2 persist table here.
 --
 -- Compare with SP_BUILD_MDM_CHANGELOG: this is the same LAG + Change + Change % logic,
 -- but you can read, compile and run it before it touches any data.
 -- In Session 2 this becomes a single call to the build_changelog macro.
 
-
 with
 
 history as (
 
-    select * from {{ ref('mpl_bikes') }}
+    select * from {{ source('mpl', 'raw_mpl_bikes') }}
+
 
 ),
 
