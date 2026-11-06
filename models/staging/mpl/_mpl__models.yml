@@ -1,6 +1,44 @@
 models:
   - name: stg_mpl__bikes
     description: >
-      MPL bike history: every load day of the extract, one row per product per load day.
-      Stands in for the SCD2 persist table in Session 1. In Session 2 this filters to a single
-      day with var('load_day') and a snapshot takes over the history.
+      MPL bike history from the raw_mpl_bikes source: every load day of the extract, one row per
+      product per load day. Stands in for the SCD2 persist table in Session 1. In Session 2 this
+      filters to a single day with var('load_day') and a snapshot takes over the history.
+      The contract fails the build if the source's shape changes, before bad data goes any further.
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: load_day
+        description: Which daily extract the row belongs to (1, 2 or 3).
+        data_type: number(38,0)
+      - name: product_id
+        description: MPL product key.
+        data_type: number(38,0)
+      - name: sku
+        description: Stock keeping unit, e.g. BK-1001.
+        data_type: varchar
+      - name: model_name
+        description: Marketing name of the bike model.
+        data_type: varchar
+      - name: model_year
+        description: Model year of the bike.
+        data_type: number(38,0)
+      - name: product_family
+        description: Product family (Road, Mountain, Gravel, Active, Trail).
+        data_type: varchar
+      - name: msrp_usd
+        description: Manufacturer's suggested retail price in USD (raw column `msrp`).
+        data_type: number(38,2)
+      - name: launch_date
+        description: Date the product launches.
+        data_type: date
+      - name: display_order
+        description: Sort order used for display.
+        data_type: number(38,0)
+      - name: updated_by_user_id
+        description: ID of the user who last updated the record (raw column `update_user`).
+        data_type: number(38,0)
+      - name: last_updated_at
+        description: When the record was last updated in MPL (raw column `last_update`).
+        data_type: timestamp_ntz

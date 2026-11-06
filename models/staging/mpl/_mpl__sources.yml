@@ -1,0 +1,56 @@
+sources:
+  - name: mpl
+    description: >
+      Raw extracts from MPL (product lifecycle management), landed in Snowflake by ingestion.
+      dbt reads these tables but never builds or changes them.
+    database: analytics
+    schema: sfahad_specialized_workshop
+    config:
+      # No loaded_at_field: dbt uses Snowflake's table metadata (last load time), which tells
+      # you whether ingestion delivered, not what the business dates in the rows say.
+      freshness:
+        warn_after: {count: 1, period: day}
+        error_after: {count: 7, period: day}
+    tables:
+      - name: raw_mpl_bikes
+        description: >
+          Daily full extracts of the MPL bike master, one row per product per `load_day`.
+          The equivalent of MPL_BIKES_FULL_TEMP, kept for every day.
+        columns:
+          - name: load_day
+            description: Which daily extract the row belongs to (1, 2 or 3).
+            data_type: number(38,0)
+            data_tests:
+              - not_null
+          - name: product_id
+            description: MPL product key. Unique within a load day.
+            data_type: number(38,0)
+            data_tests:
+              - not_null
+          - name: sku
+            description: Stock keeping unit, e.g. BK-1001.
+            data_type: varchar
+          - name: model_name
+            description: Marketing name of the bike model.
+            data_type: varchar
+          - name: model_year
+            description: Model year of the bike.
+            data_type: number(38,0)
+          - name: product_family
+            description: Product family (Road, Mountain, Gravel, Active, Trail).
+            data_type: varchar
+          - name: msrp
+            description: Manufacturer's suggested retail price in USD. Renamed to msrp_usd in staging.
+            data_type: number(38,2)
+          - name: launch_date
+            description: Date the product launches.
+            data_type: date
+          - name: display_order
+            description: Sort order used for display.
+            data_type: number(38,0)
+          - name: update_user
+            description: ID of the user who last updated the record. Renamed to updated_by_user_id in staging.
+            data_type: number(38,0)
+          - name: last_update
+            description: When the record was last updated in MPL. Renamed to last_updated_at in staging.
+            data_type: timestamp_ntz
