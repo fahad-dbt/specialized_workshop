@@ -1,0 +1,57 @@
+sources:
+  - name: mpl
+    description: >
+      Raw extracts from MPL (product lifecycle management), landed in Snowflake by ingestion.
+      dbt reads these tables but never builds or changes them.
+    database: analytics
+    schema: sfahad_specialized_workshop
+    config:
+      # No loaded_at_field: dbt uses Snowflake's table metadata (last load time), which tells
+      # you whether ingestion delivered, not what the business dates in the rows say.
+      freshness:
+        warn_after: {count: 1, period: day}
+        error_after: {count: 7, period: day}
+    tables:
+      - name: raw_mpl_bikes
+        description: >
+          Daily full extracts of the MPL bike master, one row per product per `load_day`.
+          The equivalent of MPL_BIKES_FULL_TEMP, kept for every day. Covers NEW, UPDATE and
+          hard DELETE plus the Change / Change % math.
+        columns:
+          - name: load_day
+            description: '{{ doc("load_day") }}'
+            data_type: number(38,0)
+            data_tests:
+              - not_null
+          - name: product_id
+            description: '{{ doc("mpl_product_id") }}'
+            data_type: number(38,0)
+            data_tests:
+              - not_null
+          - name: sku
+            description: '{{ doc("sku") }}'
+            data_type: varchar
+          - name: model_name
+            description: '{{ doc("model_name") }}'
+            data_type: varchar
+          - name: model_year
+            description: '{{ doc("model_year") }}'
+            data_type: number(38,0)
+          - name: product_family
+            description: '{{ doc("product_family") }}'
+            data_type: varchar
+          - name: msrp
+            description: '{{ doc("msrp") }}'
+            data_type: number(38,2)
+          - name: launch_date
+            description: '{{ doc("launch_date") }}'
+            data_type: date
+          - name: display_order
+            description: '{{ doc("display_order") }}'
+            data_type: number(38,0)
+          - name: update_user
+            description: '{{ doc("update_user") }}'
+            data_type: number(38,0)
+          - name: last_update
+            description: '{{ doc("last_update") }}'
+            data_type: timestamp_ntz

@@ -134,12 +134,13 @@ models:
 
       - name: avg_msrp_change_pct
         label: Avg MSRP Change %
-        description: Average percentage change of MSRP across MSRP updates.
+        description: Average percentage change of MSRP (msrp_usd) across MSRP updates, bikes and equipment.
         type: simple
         agg: average
         expr: change_percent
         filter: |
-          {{ Dimension('product_change__column_name') }} = 'MSRP'
+          {{ Dimension('product_change__column_name') }} = 'MSRP_USD'
+
 
   - name: time_spine_daily
     description: >

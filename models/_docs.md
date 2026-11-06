@@ -11,12 +11,13 @@ updates and deletes. All of it lands in one table, `fct_product_changes`, which 
 Each tracked table is an independent lane. The lanes run in parallel instead of one table at
 a time in a Matillion loop.
 
-`seed` → `stg_*` → `snp_*` (snapshot) → `int_changelog__*` → `fct_product_changes` → metrics
+`source` / `seed` → `stg_*` → `snp_*` (snapshot) → `int_changelog__*` → `fct_product_changes` → metrics
 
 | Layer | What it does | Replaces in the stored procedure |
 |---|---|---|
-| Seeds | Simulated daily extracts, one per `load_day` | `<TABLE>_FULL_TEMP` tables |
-| Staging | One day's extract, cleaned and renamed | Source-to-persist load |
+| Sources | Raw MPL bike extracts landed in Snowflake (`raw_mpl_bikes`), with freshness checks | `<TABLE>_FULL_TEMP` tables |
+| Seeds | Simulated daily extracts for equipment, Oracle items and FOBs, one per `load_day` | `<TABLE>_FULL_TEMP` tables |
+| Staging | One day's extract, renamed once for everything downstream; contract on bikes | Source-to-persist load |
 | Snapshots | SCD2 history, including hard deletes | Persist-table merge, FULL_TEMP anti-join, biweekly delete job |
 | Intermediate | One `build_changelog` call per table | The `wide_sql` string, the unpivot and the post-insert `UPDATE` |
 | Mart | Incremental merge on a deterministic key | `INSERT INTO MDM_CHANGELOG_TBL`, `CHANGELOG_SEQ`, `CHANGELOG_LAST_RUN` |
@@ -30,8 +31,9 @@ a time in a Matillion loop.
 
 ## Adding a table
 
-Add a seed (or source), a staging model, a snapshot entry and a one-line
-`int_changelog__<table>` model. Then add that model's name to the list in `fct_product_changes`.
+Declare the raw table as a source (or add a seed), add a staging model, a snapshot entry and a
+one-line `int_changelog__<table>` model. Then add that model's name to the list in `fct_product_changes`.
+
 {% enddocs %}
 
 
@@ -90,6 +92,23 @@ always NULL (listed in `cols_to_exclude_change_diff`).
 When the record was last updated in MPL. Not tracked as a column change (it's in
 `cols_to_exclude`), but used as the watermark: it becomes `change_date` for NEW and UPDATE rows.
 {% enddocs %}
+{% docs msrp_usd %}
+Manufacturer's suggested retail price in USD (renamed from `msrp` in staging). Tracked in the
+changelog as `MSRP_USD`, which records the difference as Change and the relative difference as Change %.
+{% enddocs %}
+
+{% docs updated_by_user_id %}
+ID of the user who last updated the record (renamed from `update_user` in staging). Tracked in
+the changelog, but Change and Change % are always NULL: it ends in `_ID`, so the change math skips it.
+{% enddocs %}
+
+{% docs last_updated_at %}
+When the record was last updated in MPL (renamed from `last_update` in staging). Not tracked as a
+column change (it's in `cols_to_exclude`), but used as the watermark: it becomes `change_date` for
+NEW and UPDATE rows.
+{% enddocs %}
+
+
 
 {% docs equipment_name %}
 Name of the equipment item. Tracked in the changelog.
@@ -232,7 +251,8 @@ primary key. If the primary key is SKU, it's taken from the key.
 {% enddocs %}
 
 {% docs changelog__column_name %}
-Name of the changed column for UPDATE rows, e.g. `MSRP`. `ALL` for record-level NEW and DELETE rows.
+Name of the changed column for UPDATE rows, using the staging name, e.g. `MSRP_USD`. `ALL` for record-level NEW and DELETE rows.
+
 {% enddocs %}
 
 {% docs changelog__old_value %}

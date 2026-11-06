@@ -3,5 +3,5 @@
     table_name='MPL_BIKES',
     pk='product_id',
     source_system='MPL',
-    watermark='last_update'
+    watermark='last_updated_at'
 ) }}
