@@ -3,6 +3,7 @@ load_day,product_id,sku,equipment_name,category,msrp,deleted,update_user,last_up
 1,2002,EQ-2002,Butcher Grid Trail Tire,Tires,85.00,,4201,2026-01-05 08:00:00
 1,2003,EQ-2003,Zee Cage II,Accessories,25.00,N,4202,2026-01-05 08:00:00
 1,2004,EQ-2004,Body Geometry Sport Gel Gloves,Apparel,45.00,N,4202,2026-01-05 08:00:00
+1,2004,EQ-2004-XL,Body Geometry Sport Gel Gloves XL,Apparel,48.00,N,4202,2026-01-05 08:00:00
 1,2006,EQ-2006,Align II Helmet,Helmets,60.00,N,4201,2026-01-05 08:00:00
 1,2007,EQ-2007,Fast Trak Grid Tire,Tires,70.00,N,4201,2026-01-05 08:00:00
 1,2008,EQ-2008,Power Pro Saddle,Saddles,250.00,N,4202,2026-01-05 08:00:00
