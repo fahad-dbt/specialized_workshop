@@ -11,6 +11,7 @@
       - everything else               -> no calculation
     Returns none for "no calculation" so the caller can leave it out of the CASE.
     Change % is rounded to 2 decimals (demo change; production uses 4).
+    Demo branch for the CI compare walkthrough.
 
 -#}
 {% macro change_calc(column_name, data_type, new_value='new_variant', old_value='old_variant') %}
