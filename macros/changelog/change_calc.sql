@@ -31,7 +31,7 @@
     {%- elif is_numeric -%}
         {{ return({
             'change': "round(" ~ new_value ~ "::float - " ~ old_value ~ "::float, 4)::varchar",
-            'change_percent': "round((" ~ new_value ~ "::float - " ~ old_value ~ "::float) / nullif(" ~ old_value ~ "::float, 0), 2)"
+            'change_percent': "round((" ~ new_value ~ "::float - " ~ old_value ~ "::float) / nullif(" ~ old_value ~ "::float, 0), 8)"
         }) }}
 
     {%- elif data_type.startswith('TIMESTAMP') -%}
