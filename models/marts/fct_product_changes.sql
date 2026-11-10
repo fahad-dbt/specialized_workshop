@@ -62,7 +62,7 @@ select
     old_value,
     new_value,
     change,
-    change_percent + 1 as change_percent,  -- DEMO: whole-number change so CI compare shows it
+    change_percent,
     record_type,
     change_date,
     system_of_change,

@@ -14,7 +14,8 @@ renamed as (
         fob_id,
         sku,
         fob_port,
-        currency,
+        currency * 18.62 as peso,
+        curreny,
         fob_cost,
         effective_date
 
