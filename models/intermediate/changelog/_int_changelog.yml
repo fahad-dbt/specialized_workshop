@@ -4,6 +4,9 @@ anchors:
   - &changelog_columns
     - name: change_key
       description: '{{ doc("changelog__change_key") }}'
+      data_tests:
+        - unique
+        - not_null
     - name: table_name
       description: '{{ doc("changelog__table_name") }}'
     - name: table_pk

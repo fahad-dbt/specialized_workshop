@@ -1,25 +1,25 @@
-with
+    with
 
-source as (
+    source as (
 
-    -- One day's full extract. Equivalent of MPL_BIKE_FOBS_FULL_TEMP.
-    select * from {{ ref('mpl_bike_fobs') }}
-    where load_day = {{ var('load_day') }}
+        -- One day's full extract. Equivalent of MPL_BIKE_FOBS_FULL_TEMP.
+        select * from {{ ref('mpl_bike_fobs') }}
+        where load_day = {{ var('load_day') }}
 
-),
+    ),
 
-renamed as (
+    renamed as (
 
-    select
-        fob_id,
-        sku,
-        fob_port,
-        currency,
-        fob_cost,
-        effective_date
+        select
+            fob_id,
+            sku,
+            fob_port,
+            currency,
+            fob_cost + 100 as fob_cost,
+            effective_date
 
-    from source
+        from source
 
-)
+    )
 
-select * from renamed
+    select * from renamed

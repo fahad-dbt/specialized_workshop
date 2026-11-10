@@ -7,7 +7,7 @@ models:
       Column contract enforced so downstream consumers (Tableau) can't be broken by a silent change.
     config:
       contract:
-        enforced: true
+        enforced: false  # DEMO BRANCH ONLY: testing whether CI compare skips contracted models
     semantic_model:
       enabled: true
     agg_time_dimension: change_date

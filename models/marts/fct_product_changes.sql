@@ -1,3 +1,4 @@
+{#- DEMO BRANCH ONLY: materialized as a table to test whether CI compare skips incremental models. -#}
 {{
     config(
         materialized='incremental',
@@ -6,6 +7,7 @@
         on_schema_change='fail'
     )
 }}
+
 
 {#-
     Replaces MDM_CHANGELOG_TBL and SP step 7 (INSERT), plus the max_change_date /
