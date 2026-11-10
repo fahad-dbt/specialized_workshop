@@ -14,7 +14,6 @@
     existing_records / CHANGELOG_LAST_RUN bookkeeping.
 
     Adding a table to the changelog = add its int model to this list.
-    adding comment
 -#}
 {%- set changelog_models = [
     'int_changelog__mpl_bikes',
