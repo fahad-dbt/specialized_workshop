@@ -1,7 +1,7 @@
 {#- DEMO BRANCH ONLY: materialized as a table to test whether CI compare skips incremental models. -#}
 {{
     config(
-        materialized='table',
+        materialized='incremental',
         incremental_strategy='merge',
         unique_key='change_key',
         on_schema_change='fail'
@@ -62,7 +62,7 @@ select
     old_value,
     new_value,
     change,
-    change_percent + 1,
+    change_percent + 1 as change_percent,  -- DEMO: whole-number change so CI compare shows it
     record_type,
     change_date,
     system_of_change,
