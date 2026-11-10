@@ -15,8 +15,7 @@
             sku,
             fob_port,
             currency,
-            fob_cost,
-            fob_cost + 100 as fob_cost_100,
+            fob_cost + 100 as fob_cost,
             effective_date
 
         from source
