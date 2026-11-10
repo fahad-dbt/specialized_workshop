@@ -62,7 +62,7 @@ select
     old_value,
     new_value,
     change,
-    change_percent,
+    change_percent + 1,
     record_type,
     change_date,
     system_of_change,
